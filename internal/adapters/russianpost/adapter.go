@@ -18,7 +18,7 @@ type Envelope struct {
 }
 
 type Body struct {
-	Response OperationHistoryResponse `xml:"getOperationHistoryReponse"`
+	Response OperationHistoryResponse `xml:"getOperationHistoryResponse"`
 }
 
 type OperationHistoryResponse struct {
@@ -30,8 +30,10 @@ type OperationHistoryData struct {
 }
 
 type HistoryRecord struct {
+	Barcode  string `xml:"ItemParameters>Barcode"`
 	OperDate string `xml:"OperationParameters>OperDate"`
-	OperName string `xml:"OperationParameters>OperAttr>Name"`
+	OperType string `xml:"OperationParameters>OperType>Name"`
+	OperAttr string `xml:"OperationParameters>OperAttr>Name"`
 	Address  string `xml:"AddressParameters>OperationAddress>Description"`
 }
 
@@ -112,10 +114,19 @@ func (a *RussianPostAdapter) Track(ctx context.Context, trackingNumber string) (
 		return nil, fmt.Errorf("unmarshal SOAP: %w", err)
 	}
 
+	records := soapResp.Body.Response.Data.Records
+	if len(records) == 0 {
+		return &domain.RawTrackingResult{
+			Courier:    a.Name(),
+			Successful: false,
+			Error:      "no tracking history data",
+		}, nil
+	}
+
 	// Преобразуем в RawTrackingResult
 	raw := &domain.RawTrackingResult{
 		Courier:    a.Name(),
-		RawData:    soapResp.Body.Response.Data,
+		RawData:    records,
 		Successful: true,
 	}
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"multitrack-bot/internal/adapters"
+	"multitrack-bot/internal/adapters/russianpost"
 	"multitrack-bot/internal/domain"
 	"time"
 )
@@ -53,21 +54,45 @@ func NewNormalizationEngine() *NormalizationEngine {
 	return &NormalizationEngine{}
 }
 
-func (n *NormalizationEngine) Normalize(rawResult *domain.RawTrackingResult) *domain.TrackingResult {
+func (n *NormalizationEngine) Normalize(raw *domain.RawTrackingResult) *domain.TrackingResult {
 	result := &domain.TrackingResult{
-		Number:      "tracking_number", // todo
-		Courier:     rawResult.Courier,
-		Status:      "Processing",
-		Description: "Package is processing",
-		Checkpoints: []domain.Checkpoint{
-			{
-				Date:        time.Now(),
-				Location:    "Saint-Petersburg",
-				Status:      "Accepted",
-				Description: "Package was Delivered and Received",
-			},
-		},
+		Courier: raw.Courier,
 	}
 
+	switch data := raw.RawData.(type) {
+	case []russianpost.HistoryRecord:
+		if len(data) > 0 {
+			// last operation is the last record
+			last := data[len(data)-1]
+			result.Number = last.Barcode
+
+			var statusMap = map[string]string{
+				"Вручение":  "Доставлено",
+				"Обработка": "В пути",
+				"Прием":     "Принято",
+				"Присвоение идентификатора": "Создана",
+			}
+
+			humanStatus := statusMap[last.OperType]
+			if humanStatus != "" {
+				result.Status = humanStatus
+			}
+
+			result.Description = last.OperType
+
+			for _, r := range data {
+				t, _ := time.Parse(time.RFC3339, r.OperDate)
+				result.Checkpoints = append(result.Checkpoints, domain.Checkpoint{
+					Date:        t,
+					Location:    r.Address,
+					Status:      r.OperAttr,
+					Description: r.OperType,
+				})
+			}
+		}
+	}
+
+	result.LastUpdated = time.Now()
 	return result
+
 }
