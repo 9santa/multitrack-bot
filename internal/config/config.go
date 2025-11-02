@@ -11,6 +11,7 @@ type Config struct {
 	RussianPostPass  string
 }
 
+// config is loaded from environment variables
 func Load() *Config {
 	return &Config{
 		BotToken:         getEnv("BOT_TOKEN", ""),
