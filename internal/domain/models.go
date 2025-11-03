@@ -24,3 +24,11 @@ type RawTrackingResult struct {
 	Successful bool        `json:"successful"`
 	Error      string      `json:"error,omitempty"`
 }
+
+type HistoryRecord struct {
+	Barcode  string `xml:"ItemParameters>Barcode"`
+	OperDate string `xml:"OperationParameters>OperDate"`
+	OperType string `xml:"OperationParameters>OperType>Name"`
+	OperAttr string `xml:"OperationParameters>OperAttr>Name"`
+	Address  string `xml:"AddressParameters>OperationAddress>Description"`
+}
