@@ -16,8 +16,8 @@ type TrackingService struct {
 
 func NewTrackingService(adapterManager *adapters.AdapterManager) *TrackingService {
 	return &TrackingService{
-		adapterManager: adapterManager,
-		normalizer:     normalizers.NewNormalizerManager(),
+		adapterManager:    adapterManager,
+		normalizerManager: normalizers.NewNormalizerManager(),
 	}
 }
 
