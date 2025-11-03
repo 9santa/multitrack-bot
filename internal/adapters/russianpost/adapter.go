@@ -93,7 +93,7 @@ func (a *RussianPostAdapter) Track(ctx context.Context, trackingNumber string) (
 		return nil, fmt.Errorf("create request: %w", err)
 	}
 
-	// ⚠️ SOAP 1.2 обязательный заголовок (иначе 415)
+	// SOAP 1.2 обязательный заголовок (иначе 415)
 	req.Header.Set("Content-Type", "application/soap+xml; charset=utf-8")
 
 	resp, err := a.client.Do(req)
@@ -125,7 +125,7 @@ func (a *RussianPostAdapter) Track(ctx context.Context, trackingNumber string) (
 
 	// Преобразуем в RawTrackingResult
 	raw := &domain.RawTrackingResult{
-		Courier:    "Почта России",
+		Courier:    "russianpost",
 		RawData:    records,
 		Successful: true,
 	}

@@ -1,9 +1,11 @@
 package gateway
 
 import (
-	"github.com/gin-gonic/gin"
 	"multitrack-bot/internal/core"
 	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type GatewayServer struct {
@@ -51,7 +53,11 @@ func (g *GatewayServer) trackPackage(c *gin.Context) {
 }
 
 func (g *GatewayServer) healthCheck(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	c.JSON(http.StatusOK, gin.H{
+		"status":    "ok",
+		"service":   "multitrack-bot",
+		"timestamp": time.Now(),
+	})
 }
 
 func (g *GatewayServer) Run(port string) error {

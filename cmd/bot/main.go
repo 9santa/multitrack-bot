@@ -6,6 +6,10 @@ import (
 	"multitrack-bot/internal/bot"
 	"multitrack-bot/internal/config"
 	"multitrack-bot/internal/core"
+	"multitrack-bot/internal/gateway"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -28,6 +32,27 @@ func main() {
 		log.Fatal("Failed to create a bot:", err)
 	}
 
-	log.Println("Bot is starting...")
-	bot.Start()
+	// create gateway server
+	gatewayServer := gateway.NewGateway(trackingService)
+
+	// run bot and gateway in goroutines
+	go func() {
+		log.Println("Bot is starting...")
+		bot.Start()
+	}()
+
+	go func() {
+		log.Printf("Gateway server is starting on port %s...", cfg.ServerPort)
+		if err := gatewayServer.Run(cfg.ServerPort); err != nil {
+			log.Fatalf("Failed to start gateway server: %v", err)
+		}
+	}()
+
+	// wait for interrupt signal
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	log.Println("Shutting down...")
+
 }

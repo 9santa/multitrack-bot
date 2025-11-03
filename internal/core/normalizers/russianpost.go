@@ -1,6 +1,7 @@
 package normalizers
 
 import (
+	"multitrack-bot/internal/adapters/russianpost"
 	"multitrack-bot/internal/domain"
 	"sort"
 	"time"
@@ -27,7 +28,7 @@ func (n *RussianPostNormalizer) Normalize(raw *domain.RawTrackingResult) *domain
 		return result
 	}
 
-	records, ok := raw.RawData.([]domain.HistoryRecord)
+	records, ok := raw.RawData.([]russianpost.HistoryRecord)
 	if !ok || len(records) == 0 {
 		result.Status = "Не найдено"
 		result.Description = "Нет данных по отслеживанию"
