@@ -125,7 +125,7 @@ func (a *RussianPostAdapter) Track(ctx context.Context, trackingNumber string) (
 
 	// Преобразуем в RawTrackingResult
 	raw := &domain.RawTrackingResult{
-		Courier:    a.Name(),
+		Courier:    "Почта России",
 		RawData:    records,
 		Successful: true,
 	}
